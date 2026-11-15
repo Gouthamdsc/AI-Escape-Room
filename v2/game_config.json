@@ -1,0 +1,161 @@
+{
+  "title": "The Locked Library",
+  "intro": "**Welcome to The Locked Library.**\n\nYou wake up on a cold wooden floor. The door is locked, the windows are bricked up, and a single lamp flickers over the room. You can make out a **desk**, a **bookshelf**, a **painting**, a **grandfather clock** and the **door** with its glowing four-digit keypad.\n\nType what you want to do in plain English, e.g. *\"examine the desk\"*, *\"take the key\"*, *\"try 1234 on the drawer\"*. Type **help**, **hint**, **inventory** or **restart** at any time.",
+  "help": "Describe what you want to do in plain English: examine objects, take items, use items on objects, enter four-digit codes (e.g. 'try 1234 on the drawer') or open the door. Commands: look around, inventory, hint, restart.",
+
+  "objects": {
+    "desk": {
+      "name": "desk",
+      "aliases": ["desk", "writing desk", "table", "blotter"],
+      "examine": {
+        "text": "A heavy oak desk with a leather blotter. On it lie a magnifying glass and a handwritten note that reads: 'The red books speak in a language too small for the eye. Their numbers open the drawer.'",
+        "reveals_items": ["magnifying_glass"],
+        "reveals_clues": ["desk_note"]
+      }
+    },
+    "bookshelf": {
+      "name": "bookshelf",
+      "aliases": ["bookshelf", "bookcase", "shelf", "shelves"],
+      "examine": {
+        "text": "A tall bookshelf crammed with dusty volumes. Four red books are arranged differently from the rest, as if someone wanted them noticed."
+      }
+    },
+    "red_books": {
+      "name": "four red books",
+      "aliases": ["four red books", "red books", "crimson books", "four books", "those books", "books", "book", "spines"],
+      "visible_when": {"examined": "bookshelf"},
+      "examine": {
+        "text": "The four red books sit side by side. Faded handwriting runs along their spines, far too small to read with the naked eye.",
+        "needs_item": {
+          "item": "magnifying_glass",
+          "text": "Through the magnifying glass you can read a tiny handwritten number on each spine. From left to right: 3, 8, 1, 5.",
+          "reveals_clues": ["books_digits"]
+        }
+      }
+    },
+    "painting": {
+      "name": "painting",
+      "aliases": ["painting", "picture", "portrait", "canvas", "frame", "seascape"],
+      "examine": {
+        "text": "A gloomy painting of a stormy sea. The frame hangs slightly crooked. Behind it you discover a small wall safe with a keyhole."
+      }
+    },
+    "safe": {
+      "name": "wall safe",
+      "aliases": ["wall safe", "safe", "keyhole"],
+      "visible_when": {"examined": "painting"},
+      "puzzle": "safe",
+      "examine": {
+        "text": "A small steel wall safe set into the plaster. It has a keyhole and no dial."
+      },
+      "flag_texts": {
+        "safe_open": "The safe stands open. Inside is a folded note: 'The way out begins with 6 and 2. The rest, the clock still remembers.'"
+      }
+    },
+    "clock": {
+      "name": "grandfather clock",
+      "aliases": ["grandfather clock", "clock", "timepiece"],
+      "examine": {
+        "text": "A grandfather clock whose pendulum hangs motionless. It has stopped at exactly 4:00: the hour hand points to 4 and the minute hand to 0.",
+        "reveals_clues": ["clock_time"]
+      }
+    },
+    "drawer": {
+      "name": "drawer",
+      "aliases": ["locked drawer", "desk drawer", "drawer"],
+      "puzzle": "drawer",
+      "examine": {
+        "text": "A sturdy desk drawer, locked. Instead of a keyhole it has a small four-digit dial."
+      },
+      "flag_texts": {
+        "drawer_open": "The drawer stands open."
+      }
+    },
+    "door": {
+      "name": "door",
+      "aliases": ["oak door", "heavy door", "door", "exit", "keypad", "way out"],
+      "puzzle": "door",
+      "is_exit": true,
+      "examine": {
+        "text": "A heavy oak door, firmly locked. Beside it a keypad waits for a four-digit code."
+      },
+      "flag_texts": {
+        "door_unlocked": "The door is unlocked and ready to be opened."
+      }
+    }
+  },
+
+  "items": {
+    "magnifying_glass": {
+      "name": "magnifying glass",
+      "aliases": ["magnifying glass", "magnifier", "glass", "lens"],
+      "description": "A brass-rimmed magnifying glass. It makes tiny writing readable.",
+      "use_on": {"red_books": "examine"}
+    },
+    "brass_key": {
+      "name": "brass key",
+      "aliases": ["brass key", "small key", "key"],
+      "description": "A small brass key, cold to the touch."
+    }
+  },
+
+  "clues": {
+    "desk_note": "Desk note: the red books hold numbers that open the drawer.",
+    "books_digits": "The four red books, left to right: 3, 8, 1, 5.",
+    "safe_note": "Safe note: the way out begins with 6 and 2; the clock remembers the rest.",
+    "clock_time": "The grandfather clock stopped at 4:00."
+  },
+
+  "puzzles": {
+    "drawer": {
+      "type": "code",
+      "flag": "drawer_open",
+      "code": "3815",
+      "locked_text": "The drawer is locked. It has a four-digit dial.",
+      "fail_text": "The dial clicks around but the drawer stays shut. That is not the right combination.",
+      "already_text": "The drawer is already open.",
+      "on_solve": {
+        "facts": ["The dial clicks into place and the drawer slides open. Inside lies a small brass key."],
+        "reveals_items": ["brass_key"]
+      }
+    },
+    "safe": {
+      "type": "item",
+      "item": "brass_key",
+      "flag": "safe_open",
+      "locked_text": "The wall safe is locked. It has a small keyhole.",
+      "already_text": "The safe is already open.",
+      "on_solve": {
+        "facts": ["The key turns and the safe door swings open. Inside is a folded note: 'The way out begins with 6 and 2. The rest, the clock still remembers.'"],
+        "reveals_clues": ["safe_note"]
+      }
+    },
+    "door": {
+      "type": "code",
+      "flag": "door_unlocked",
+      "code": "6240",
+      "requires": {"flags": ["drawer_open", "safe_open"], "clues": ["clock_time"]},
+      "locked_text": "The door is locked. A four-digit keypad glows beside it.",
+      "fail_text": "The keypad buzzes angrily. That code is wrong.",
+      "already_text": "The door is already unlocked.",
+      "on_solve": {
+        "facts": ["The keypad chimes green and the lock clicks open. The door is free to open."]
+      }
+    }
+  },
+
+  "exit_text": "You push the heavy door open and cold night air rushes in. You are free!",
+
+  "hints": {
+    "desk": ["The desk is the most obvious place to start.", "Try: examine the desk."],
+    "take_glass": ["Something on the desk could be useful to carry.", "Try: take the magnifying glass."],
+    "bookshelf": ["There is more to this room than the desk. Look at the shelves.", "Try: examine the bookshelf."],
+    "books": ["Some books are arranged differently. Tiny writing needs a closer look.", "Examine the red books while carrying the magnifying glass."],
+    "drawer": ["The drawer wants four digits.", "Enter the numbers you found on the red books, left to right, on the drawer."],
+    "take_key": ["Something inside the open drawer may be worth taking.", "Try: take the key."],
+    "painting": ["A crooked frame often hides something.", "Try: examine the painting."],
+    "safe": ["You now have a key and there is a keyhole somewhere.", "Try: use the key on the safe."],
+    "clock": ["The note in the safe mentions a clock.", "Try: examine the clock."],
+    "door": ["You should now hold both halves of the exit code.", "Combine the first two digits from the safe note with the time the clock stopped at, then enter all four on the door."]
+  }
+}
